@@ -1,0 +1,27 @@
+*.iml
+.kotlin
+.gradle
+**/build/
+xcuserdata
+!src/**/build/
+local.properties
+.idea
+.DS_Store
+captures
+.externalNativeBuild
+.cxx
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+node_modules/
+
+# Bundled binaries (too large for git)
+composeApp/appResources/macos-arm64/yt-dlp
+composeApp/appResources/macos-arm64/ffmpeg
+composeApp/appResources/macos-x64/yt-dlp
+composeApp/appResources/macos-x64/ffmpeg
+composeApp/appResources/windows-x64/yt-dlp.exe
+composeApp/appResources/windows-x64/ffmpeg.exe
