@@ -21,6 +21,7 @@ fun App(viewModel: DownloadViewModel) {
             onStartDownload = viewModel::startDownload,
             onToggleTheme = viewModel::onToggleTheme,
             onToggleLanguage = viewModel::onToggleLanguage,
+            onCancelDownload = viewModel::cancelDownload,
             onSnackbarDismissed = viewModel::onSnackbarDismissed
         )
     }

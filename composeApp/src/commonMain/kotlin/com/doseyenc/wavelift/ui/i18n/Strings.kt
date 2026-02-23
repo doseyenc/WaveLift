@@ -61,7 +61,18 @@ data class Strings(
 
     // Notifications
     val notificationTitle: String,
-    val notificationMessage: String
+    val notificationMessage: String,
+
+    // Friendly Error Messages
+    val errorPlaylistNotFound: String,
+    val errorPrivateVideo: String,
+    val errorVideoUnavailable: String,
+    val errorGeoRestricted: String,
+    val errorLoginRequired: String,
+    val errorCopyright: String,
+    val errorNetwork: String,
+    val downloadCancelled: String,
+    val cancelButton: String
 )
 
 val TurkishStrings = Strings(
@@ -103,7 +114,16 @@ val TurkishStrings = Strings(
     analysisError = "Analiz hatası",
     linkAnalyzing = "Bağlantı analiz ediliyor...",
     notificationTitle = "WaveLift",
-    notificationMessage = "İndirme tamamlandı!"
+    notificationMessage = "İndirme tamamlandı!",
+    errorPlaylistNotFound = "🔒 Bu oynatma listesi bulunamadı!\nOynatma listesi silinmiş, gizli (private) olabilir veya URL hatalı olabilir.",
+    errorPrivateVideo = "🔒 Bu video gizli (private)!\nVideo sahibi tarafından gizlenmiş. Herkese açık bir video deneyin.",
+    errorVideoUnavailable = "⚠️ Bu video kullanılamıyor!\nVideo kaldırılmış veya bölgenizde erişime kapalı olabilir.",
+    errorGeoRestricted = "🌍 Bu video bölgenizde erişime kapalı!\nİçerik coğrafi kısıtlama nedeniyle izlenemiyor.",
+    errorLoginRequired = "🔐 Bu içerik için giriş yapılması gerekiyor!\nYaş kısıtlamalı veya üyelere özel içerik olabilir.",
+    errorCopyright = "©️ Bu içerik telif hakkı nedeniyle engellenmiş!\nİçerik sahibi tarafından indirme engellenmiş.",
+    errorNetwork = "🌐 Bağlantı hatası!\nİnternet bağlantınızı kontrol edin ve tekrar deneyin.",
+    downloadCancelled = "İndirme iptal edildi.",
+    cancelButton = "Durdur"
 )
 
 val EnglishStrings = Strings(
@@ -145,7 +165,16 @@ val EnglishStrings = Strings(
     analysisError = "Analysis error",
     linkAnalyzing = "Analyzing link...",
     notificationTitle = "WaveLift",
-    notificationMessage = "Download complete!"
+    notificationMessage = "Download complete!",
+    errorPlaylistNotFound = "🔒 Playlist not found!\nThe playlist may have been deleted, set to private, or the URL may be incorrect.",
+    errorPrivateVideo = "🔒 This video is private!\nThe video owner has restricted access. Try a public video.",
+    errorVideoUnavailable = "⚠️ This video is unavailable!\nThe video may have been removed or is not available in your region.",
+    errorGeoRestricted = "🌍 This video is not available in your region!\nThe content is blocked due to geographic restrictions.",
+    errorLoginRequired = "🔐 Login required for this content!\nThis may be age-restricted or members-only content.",
+    errorCopyright = "©️ This content is blocked due to copyright!\nThe content owner has blocked downloading.",
+    errorNetwork = "🌐 Connection error!\nPlease check your internet connection and try again.",
+    downloadCancelled = "Download cancelled.",
+    cancelButton = "Stop"
 )
 
 fun getStrings(language: Language): Strings = when (language) {

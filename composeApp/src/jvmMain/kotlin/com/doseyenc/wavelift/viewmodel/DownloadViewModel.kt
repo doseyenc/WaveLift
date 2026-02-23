@@ -8,7 +8,9 @@ import com.doseyenc.wavelift.model.AudioQuality
 import com.doseyenc.wavelift.model.DownloadItem
 import com.doseyenc.wavelift.model.DownloadState
 import com.doseyenc.wavelift.ui.i18n.Language
+import com.doseyenc.wavelift.ui.i18n.Strings
 import com.doseyenc.wavelift.ui.i18n.getStrings
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.swing.JFileChooser
@@ -20,6 +22,9 @@ class DownloadViewModel : ViewModel() {
         UiState(outputDirectory = System.getProperty("user.home") + "/Music")
     )
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    // Track active download jobs for cancellation
+    private val activeJobs = mutableMapOf<String, Job>()
 
     private val strings get() = getStrings(_uiState.value.language)
 
@@ -59,14 +64,11 @@ class DownloadViewModel : ViewModel() {
             fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
             dialogTitle = strings.directoryPickerTitle
             isAcceptAllFileFilterUsed = false
-            // Enable "New Folder" button
             putClientProperty("FileChooser.useShellFolder", false)
         }
-        // Show save dialog which includes "New Folder" button on all platforms
         val result = chooser.showSaveDialog(null)
         if (result == JFileChooser.APPROVE_OPTION) {
             val selectedDir = chooser.selectedFile
-            // Create directory if it doesn't exist
             if (!selectedDir.exists()) {
                 selectedDir.mkdirs()
             }
@@ -97,7 +99,7 @@ class DownloadViewModel : ViewModel() {
                     is DownloadState.Error -> {
                         _uiState.update {
                             it.copy(
-                                snackbarMessage = state.message,
+                                snackbarMessage = localizeError(state.message),
                                 isAnalyzing = false,
                                 playlistInfo = null
                             )
@@ -107,6 +109,21 @@ class DownloadViewModel : ViewModel() {
                 }
             }
             _uiState.update { it.copy(isAnalyzing = false) }
+        }
+    }
+
+    fun cancelDownload(itemId: String) {
+        activeJobs[itemId]?.cancel()
+        activeJobs.remove(itemId)
+        _uiState.update { uiState ->
+            val updatedDownloads = uiState.downloads.map { download ->
+                if (download.id == itemId) {
+                    download.copy(state = DownloadState.Error(strings.downloadCancelled))
+                } else {
+                    download
+                }
+            }
+            uiState.copy(downloads = updatedDownloads)
         }
     }
 
@@ -139,8 +156,8 @@ class DownloadViewModel : ViewModel() {
             )
         }
 
-        // Start download
-        viewModelScope.launch {
+        // Start download and track the job
+        val job = viewModelScope.launch {
             engine.download(
                 url = url,
                 quality = currentState.selectedQuality,
@@ -151,7 +168,13 @@ class DownloadViewModel : ViewModel() {
                 _uiState.update { uiState ->
                     val updatedDownloads = uiState.downloads.map { download ->
                         if (download.id == item.id) {
-                            download.copy(state = state)
+                            // Localize error messages
+                            val localizedState = if (state is DownloadState.Error) {
+                                DownloadState.Error(localizeError(state.message))
+                            } else {
+                                state
+                            }
+                            download.copy(state = localizedState)
                         } else {
                             download
                         }
@@ -169,12 +192,42 @@ class DownloadViewModel : ViewModel() {
                         downloads = updatedDownloads,
                         snackbarMessage = when (state) {
                             is DownloadState.Completed -> strings.downloadComplete
-                            is DownloadState.Error -> state.message
+                            is DownloadState.Error -> localizeError(state.message)
                             else -> uiState.snackbarMessage
                         }
                     )
                 }
             }
+        }
+
+        activeJobs[item.id] = job
+        job.invokeOnCompletion { activeJobs.remove(item.id) }
+    }
+
+    /**
+     * Maps raw yt-dlp error messages to user-friendly localized messages.
+     */
+    private fun localizeError(rawError: String): String {
+        val lower = rawError.lowercase()
+        val s = strings
+        return when {
+            lower.contains("does not exist") || lower.contains("playlist does not exist") ->
+                s.errorPlaylistNotFound
+            lower.contains("private video") || lower.contains("this video is private") ->
+                s.errorPrivateVideo
+            lower.contains("video unavailable") || lower.contains("this video is unavailable") ||
+            lower.contains("is not available") ->
+                s.errorVideoUnavailable
+            lower.contains("geo") || lower.contains("not available in your country") ->
+                s.errorGeoRestricted
+            lower.contains("sign in") || lower.contains("login") || lower.contains("age") ->
+                s.errorLoginRequired
+            lower.contains("copyright") || lower.contains("dmca") || lower.contains("blocked") ->
+                s.errorCopyright
+            lower.contains("urlopen") || lower.contains("connection") ||
+            lower.contains("timed out") || lower.contains("network") ->
+                s.errorNetwork
+            else -> rawError
         }
     }
 

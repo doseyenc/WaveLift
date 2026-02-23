@@ -16,8 +16,14 @@ import com.doseyenc.wavelift.ui.theme.WaveLiftColors
 fun DownloadListItem(
     item: DownloadItem,
     strings: Strings,
+    onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isActive = item.state is DownloadState.Downloading ||
+            item.state is DownloadState.Analyzing ||
+            item.state is DownloadState.Converting ||
+            item.state is DownloadState.Idle
+
     Surface(
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceVariant,
@@ -65,7 +71,24 @@ fun DownloadListItem(
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Cancel/Stop button for active downloads
+            if (isActive) {
+                TextButton(
+                    onClick = onCancel,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(
+                        text = strings.cancelButton,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
             Surface(
                 shape = MaterialTheme.shapes.small,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)

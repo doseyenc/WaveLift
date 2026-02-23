@@ -32,6 +32,7 @@ fun MainScreen(
     onStartDownload: () -> Unit,
     onToggleTheme: () -> Unit,
     onToggleLanguage: () -> Unit,
+    onCancelDownload: (String) -> Unit,
     onSnackbarDismissed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -131,6 +132,7 @@ fun MainScreen(
                     DownloadListItem(
                         item = item,
                         strings = strings,
+                        onCancel = { onCancelDownload(item.id) },
                         modifier = Modifier.animateItem()
                     )
                 }
