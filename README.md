@@ -7,7 +7,7 @@
 
 | Screenshot | Demo Video |
 | :---: | :---: |
-| ![WaveLift Screenshot](img/image.png) | <video src="img/video.mov" width="400" controls></video> |
+| ![WaveLift Screenshot](img/image.png) | ![WaveLift Demo](img/video.mp4) |
 
 
 ## ✨ Key Features
