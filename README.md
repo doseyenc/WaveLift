@@ -69,3 +69,4 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 
 ---
 Developed with ❤️ by [Çağrı](https://github.com/doseyenc)
+

@@ -106,6 +106,7 @@ compose.desktop {
 
             macOS {
                 bundleID = "com.doseyenc.wavelift"
+                iconFile.set(project.file("src/jvmMain/resources/WaveLift.icns"))
                 dmgPackageVersion = "1.0.0"
                 dmgPackageBuildVersion = "1"
 
