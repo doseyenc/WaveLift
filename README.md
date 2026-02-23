@@ -3,7 +3,11 @@
 **WaveLift** is a high-performance desktop application designed to extract and convert YouTube media into high-quality MP3 files. Built with **Compose Multiplatform**, it delivers a native, seamless experience across both macOS and Windows with a modern Material 3 interface.
 
 > ⚡ **Developed with VibeCoding:** This project was built leveraging the **VibeCoding** methodology—prioritizing high-level AI collaboration and rapid prototyping to turn creative ideas into production-ready code with speed and precision.
+## 📸 App Preview
 
+| Screenshot | Demo Video |
+| :---: | :---: |
+| ![WaveLift Screenshot](img/image.png) | ![WaveLift Demo](img/video.mov) |
 
 
 ## ✨ Key Features
