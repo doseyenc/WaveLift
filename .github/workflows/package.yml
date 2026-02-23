@@ -2,16 +2,21 @@ name: Package WaveLift
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "**" ] # Listen to all branches
     tags: [ 'v*' ]
   pull_request:
-    branches: [ main ]
+    branches: [ "**" ]
+  workflow_dispatch: # Enable manual trigger from GitHub Actions tab
+
+permissions:
+  contents: write
 
 jobs:
   package:
     name: Package for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
         include:
@@ -37,12 +42,7 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew :composeApp:${{ matrix.task }}
-        env:
-          # Optional: Sign the macOS app if secrets are provided
-          # APPLE_ID: ${{ secrets.APPLE_ID }}
-          # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-          # MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          # ...
+        shell: bash
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
