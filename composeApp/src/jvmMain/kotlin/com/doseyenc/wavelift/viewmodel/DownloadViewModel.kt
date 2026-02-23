@@ -78,6 +78,8 @@ class DownloadViewModel : ViewModel() {
         }
     }
 
+    private var analysisJob: Job? = null
+
     fun analyzeUrl() {
         val url = _uiState.value.url.trim()
         if (url.isEmpty()) {
@@ -89,26 +91,30 @@ class DownloadViewModel : ViewModel() {
             return
         }
 
-        viewModelScope.launch {
+        analysisJob?.cancel()
+        analysisJob = viewModelScope.launch {
             _uiState.update { it.copy(isAnalyzing = true, playlistInfo = null) }
-            engine.analyzePlaylist(url).collect { state ->
-                when (state) {
-                    is DownloadState.Analyzing -> {
-                        _uiState.update { it.copy(playlistInfo = state.message) }
-                    }
-                    is DownloadState.Error -> {
-                        _uiState.update {
-                            it.copy(
-                                snackbarMessage = localizeError(state.message),
-                                isAnalyzing = false,
-                                playlistInfo = null
-                            )
+            try {
+                engine.analyzePlaylist(url).collect { state ->
+                    when (state) {
+                        is DownloadState.Analyzing -> {
+                            _uiState.update { it.copy(playlistInfo = state.message) }
                         }
+                        is DownloadState.Error -> {
+                            _uiState.update {
+                                it.copy(
+                                    snackbarMessage = localizeError(state.message),
+                                    isAnalyzing = false,
+                                    playlistInfo = null
+                                )
+                            }
+                        }
+                        else -> {}
                     }
-                    else -> {}
                 }
+            } finally {
+                _uiState.update { it.copy(isAnalyzing = false) }
             }
-            _uiState.update { it.copy(isAnalyzing = false) }
         }
     }
 

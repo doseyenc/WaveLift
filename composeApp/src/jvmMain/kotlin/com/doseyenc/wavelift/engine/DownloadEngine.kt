@@ -25,61 +25,58 @@ class DownloadEngine {
         val command = buildCommand(url, quality, outputDir, embedThumbnail, addMetadata)
         println("[WaveLift] Running: ${command.joinToString(" ")}")
 
+        val process: Process
         try {
             val processBuilder = ProcessBuilder(command)
                 .redirectErrorStream(true)
                 .directory(java.io.File(outputDir))
 
-            val process = processBuilder.start()
+            process = processBuilder.start()
+        } catch (e: java.io.IOException) {
+            emit(DownloadState.Error(mapStartError(e)))
+            return@flow
+        }
+
+        val outputLines = mutableListOf<String>()
+        try {
             val reader = BufferedReader(InputStreamReader(process.inputStream))
-
-            var lastTitle: String? = null
-            val outputLines = mutableListOf<String>()
-
             reader.useLines { lines ->
                 for (line in lines) {
-                    if (!coroutineContext.isActive) {
-                        process.destroyForcibly()
-                        return@useLines
-                    }
-
-                    println("[yt-dlp] $line") // Debug log
+                    if (!coroutineContext.isActive) break
+                    println("[yt-dlp] $line")
                     outputLines.add(line)
 
-                    // Try to extract title from destination line
-                    ProgressParser.parseTitleFromDestination(line)?.let {
-                        lastTitle = it
-                    }
-
-                    // Parse and emit progress updates
-                    ProgressParser.parseProgress(line)?.let { state ->
-                        emit(state)
-                    }
+                    ProgressParser.parseProgress(line)?.let { emit(it) }
                 }
             }
 
-            val exitCode = process.waitFor()
-            if (exitCode == 0) {
-                emit(DownloadState.Completed(outputDir))
-            } else {
-                // Collect last few output lines for error context
-                val errorContext = outputLines.takeLast(5).joinToString("\n")
-                emit(DownloadState.Error("yt-dlp exit code: $exitCode\n$errorContext"))
+            if (coroutineContext.isActive) {
+                val exitCode = process.waitFor()
+                if (exitCode == 0) {
+                    emit(DownloadState.Completed(outputDir))
+                } else {
+                    val errorContext = outputLines.takeLast(5).joinToString("\n")
+                    emit(DownloadState.Error("yt-dlp error ($exitCode):\n$errorContext"))
+                }
             }
-        } catch (e: java.io.IOException) {
-            val message = when {
-                e.message?.contains("No such file") == true ||
-                e.message?.contains("Cannot run program") == true ->
-                    "yt-dlp not found! Please make sure yt-dlp is installed.\n" +
-                    "macOS: brew install yt-dlp\n" +
-                    "Windows: winget install yt-dlp"
-                else -> "Download error: ${e.message}"
+        } finally {
+            if (process.isAlive) {
+                println("[WaveLift] Cleaning up process...")
+                process.destroyForcibly()
             }
-            emit(DownloadState.Error(message))
-        } catch (e: Exception) {
-            emit(DownloadState.Error("Unexpected error: ${e.message}"))
         }
     }.flowOn(Dispatchers.IO)
+
+    private fun mapStartError(e: java.io.IOException): String {
+        return when {
+            e.message?.contains("No such file") == true ||
+            e.message?.contains("Cannot run program") == true ->
+                "yt-dlp not found! Please make sure yt-dlp is installed.\n" +
+                "macOS: brew install yt-dlp\n" +
+                "Windows: winget install yt-dlp"
+            else -> "Download error: ${e.message}"
+        }
+    }
 
     fun analyzePlaylist(url: String): Flow<DownloadState> = flow {
         emit(DownloadState.Analyzing("Analyzing playlist..."))
@@ -97,20 +94,21 @@ class DownloadEngine {
             add(url)
         }
 
+        val process: Process
         try {
-            val processBuilder = ProcessBuilder(command)
-                .redirectErrorStream(true)
+            val processBuilder = ProcessBuilder(command).redirectErrorStream(true)
+            process = processBuilder.start()
+        } catch (e: Exception) {
+            emit(DownloadState.Error("Failed to start analysis: ${e.message}"))
+            return@flow
+        }
 
-            val process = processBuilder.start()
+        val titles = mutableListOf<String>()
+        try {
             val reader = BufferedReader(InputStreamReader(process.inputStream))
-            val titles = mutableListOf<String>()
-
             reader.useLines { lines ->
                 for (line in lines) {
-                    if (!coroutineContext.isActive) {
-                        process.destroyForcibly()
-                        return@useLines
-                    }
+                    if (!coroutineContext.isActive) break
                     val trimmed = line.trim()
                     if (trimmed.isNotEmpty() && !trimmed.startsWith("ERROR")) {
                         titles.add(trimmed)
@@ -118,18 +116,20 @@ class DownloadEngine {
                 }
             }
 
-            val exitCode = process.waitFor()
-            if (exitCode == 0 && titles.isNotEmpty()) {
-                emit(DownloadState.Analyzing("${titles.size} songs found, ready to download!"))
-            } else if (titles.isEmpty()) {
-                emit(DownloadState.Analyzing("Single video detected."))
-            } else {
-                emit(DownloadState.Error("Playlist analysis failed."))
+            if (coroutineContext.isActive) {
+                val exitCode = process.waitFor()
+                if (exitCode == 0 && titles.isNotEmpty()) {
+                    emit(DownloadState.Analyzing("${titles.size} songs found, ready to download!"))
+                } else if (titles.isEmpty()) {
+                    emit(DownloadState.Analyzing("Single video detected."))
+                } else {
+                    emit(DownloadState.Error("Playlist analysis failed."))
+                }
             }
-        } catch (e: java.io.IOException) {
-            emit(DownloadState.Error("yt-dlp not found! Please make sure it's installed."))
-        } catch (e: Exception) {
-            emit(DownloadState.Error("Analysis error: ${e.message}"))
+        } finally {
+            if (process.isAlive) {
+                process.destroyForcibly()
+            }
         }
     }.flowOn(Dispatchers.IO)
 
