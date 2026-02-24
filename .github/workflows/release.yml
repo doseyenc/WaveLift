@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build on ${{ matrix.os }}
@@ -15,12 +18,15 @@ jobs:
         include:
           - os: macos-latest
             task: packageDmg
+            artifact_name: WaveLift-macOS
             artifact_path: composeApp/build/compose/binaries/main/dmg/*.dmg
           - os: windows-latest
             task: packageMsi
+            artifact_name: WaveLift-Windows
             artifact_path: composeApp/build/compose/binaries/main/msi/*.msi
           - os: ubuntu-latest
             task: packageDeb
+            artifact_name: WaveLift-Linux
             artifact_path: composeApp/build/compose/binaries/main/deb/*.deb
 
     steps:
@@ -50,7 +56,7 @@ jobs:
           curl -L https://evermeet.cx/ffmpeg/get/zip -o ffmpeg_mac.zip && unzip -o ffmpeg_mac.zip -d composeApp/appResources/macos-arm64/ && rm ffmpeg_mac.zip
           chmod +x composeApp/appResources/macos-arm64/ffmpeg
           
-          # macOS x64 (Copy from arm64 since yt-dlp is universal, but we need x64 ffmpeg if possible, using universal or copying for now)
+          # macOS x64
           cp composeApp/appResources/macos-arm64/yt-dlp composeApp/appResources/macos-x64/yt-dlp
           cp composeApp/appResources/macos-arm64/ffmpeg composeApp/appResources/macos-x64/ffmpeg
           
@@ -70,5 +76,25 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: WaveLift-${{ matrix.os }}
+          name: ${{ matrix.artifact_name }}
           path: ${{ matrix.artifact_path }}
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false
