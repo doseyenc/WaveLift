@@ -72,7 +72,14 @@ data class Strings(
     val errorCopyright: String,
     val errorNetwork: String,
     val downloadCancelled: String,
-    val cancelButton: String
+    val cancelButton: String,
+
+    // About
+    val aboutButton: String,
+    val aboutTitle: String,
+    val developerTitle: String,
+    val githubButton: String,
+    val linkedinButton: String
 )
 
 val TurkishStrings = Strings(
@@ -123,7 +130,12 @@ val TurkishStrings = Strings(
     errorCopyright = "©️ Bu içerik telif hakkı nedeniyle engellenmiş!\nİçerik sahibi tarafından indirme engellenmiş.",
     errorNetwork = "🌐 Bağlantı hatası!\nİnternet bağlantınızı kontrol edin ve tekrar deneyin.",
     downloadCancelled = "İndirme iptal edildi.",
-    cancelButton = "Durdur"
+    cancelButton = "Durdur",
+    aboutButton = "Hakkında",
+    aboutTitle = "WaveLift Hakkında",
+    developerTitle = "Geliştirici",
+    githubButton = "GitHub",
+    linkedinButton = "LinkedIn"
 )
 
 val EnglishStrings = Strings(
@@ -174,7 +186,12 @@ val EnglishStrings = Strings(
     errorCopyright = "©️ This content is blocked due to copyright!\nThe content owner has blocked downloading.",
     errorNetwork = "🌐 Connection error!\nPlease check your internet connection and try again.",
     downloadCancelled = "Download cancelled.",
-    cancelButton = "Stop"
+    cancelButton = "Stop",
+    aboutButton = "About",
+    aboutTitle = "About WaveLift",
+    developerTitle = "Developer",
+    githubButton = "GitHub",
+    linkedinButton = "LinkedIn"
 )
 
 fun getStrings(language: Language): Strings = when (language) {

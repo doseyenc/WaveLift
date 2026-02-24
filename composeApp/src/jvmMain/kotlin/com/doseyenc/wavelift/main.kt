@@ -1,5 +1,6 @@
 package com.doseyenc.wavelift
 
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -13,6 +14,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "WaveLift — Media Converter",
+        icon = painterResource("WaveLift.png"),
         state = WindowState(
             size = DpSize(width = 900.dp, height = 750.dp)
         )

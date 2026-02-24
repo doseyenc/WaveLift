@@ -25,3 +25,5 @@ composeApp/appResources/macos-x64/yt-dlp
 composeApp/appResources/macos-x64/ffmpeg
 composeApp/appResources/windows-x64/yt-dlp.exe
 composeApp/appResources/windows-x64/ffmpeg.exe
+composeApp/appResources/linux-x64/yt-dlp
+composeApp/appResources/linux-x64/ffmpeg

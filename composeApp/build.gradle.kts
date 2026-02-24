@@ -142,10 +142,12 @@ compose.desktop {
             windows {
                 menuGroup = "WaveLift"
                 upgradeUuid = "e8c4a1b7-2d3f-4e5a-b6c7-d8e9f0a1b2c3"
+                iconFile.set(project.file("src/jvmMain/resources/WaveLift.ico"))
             }
 
             linux {
                 debMaintainer = "doseyenc"
+                iconFile.set(project.file("src/jvmMain/resources/WaveLift.png"))
             }
         }
     }

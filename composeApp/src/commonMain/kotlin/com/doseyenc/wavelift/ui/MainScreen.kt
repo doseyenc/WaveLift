@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalUriHandler
 import com.doseyenc.wavelift.model.AudioQuality
 import com.doseyenc.wavelift.ui.components.DownloadListItem
 import com.doseyenc.wavelift.ui.components.QualitySelector
@@ -38,6 +39,8 @@ fun MainScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val strings = getStrings(uiState.language)
+    var showAboutDialog by remember { mutableStateOf(false) }
+    val uriHandler = LocalUriHandler.current
 
     LaunchedEffect(uiState.snackbarMessage) {
         uiState.snackbarMessage?.let { message ->
@@ -47,6 +50,48 @@ fun MainScreen(
             )
             onSnackbarDismissed()
         }
+    }
+
+    if (showAboutDialog) {
+        AlertDialog(
+            onDismissRequest = { showAboutDialog = false },
+            title = { Text(strings.aboutTitle) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "${strings.developerTitle}: Çağrı Döseyen",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = { uriHandler.openUri("https://github.com/doseyenc") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    ) {
+                        Text("GitHub")
+                    }
+                    Button(
+                        onClick = { uriHandler.openUri("https://linkedin.com/in/cagridoseyen") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    ) {
+                        Text("LinkedIn")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAboutDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -68,7 +113,8 @@ fun MainScreen(
                     isDarkTheme = uiState.isDarkTheme,
                     languageCode = uiState.language.code,
                     onToggleTheme = onToggleTheme,
-                    onToggleLanguage = onToggleLanguage
+                    onToggleLanguage = onToggleLanguage,
+                    onShowAbout = { showAboutDialog = true }
                 )
             }
 
@@ -149,7 +195,8 @@ private fun HeaderSection(
     isDarkTheme: Boolean,
     languageCode: String,
     onToggleTheme: () -> Unit,
-    onToggleLanguage: () -> Unit
+    onToggleLanguage: () -> Unit,
+    onShowAbout: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -169,7 +216,14 @@ private fun HeaderSection(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // About button
+            IconButton(onClick = onShowAbout) {
+                Text(
+                    text = "ℹ️",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
             // Language toggle
             TextButton(onClick = onToggleLanguage) {
                 Text(

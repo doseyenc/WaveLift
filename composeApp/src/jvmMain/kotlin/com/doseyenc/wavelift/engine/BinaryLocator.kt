@@ -46,8 +46,19 @@ object BinaryLocator {
 
     private fun findBundledBinary(name: String): File? {
         val resourcesDir = System.getProperty("compose.application.resources.dir") ?: return null
+        
+        val os = System.getProperty("os.name").lowercase()
+        val arch = System.getProperty("os.arch").lowercase()
+        
+        val platformDir = when {
+            os.contains("mac") -> if (arch.contains("aarch64") || arch.contains("arm64")) "macos-arm64" else "macos-x64"
+            os.contains("win") -> "windows-x64"
+            os.contains("linux") -> "linux-x64"
+            else -> null
+        } ?: return null
+
         val binaryName = if (isWindows) "$name.exe" else name
-        val file = File(resourcesDir, binaryName)
+        val file = File(File(resourcesDir, platformDir), binaryName)
 
         if (file.exists()) {
             // Ensure executable permission on macOS/Linux
