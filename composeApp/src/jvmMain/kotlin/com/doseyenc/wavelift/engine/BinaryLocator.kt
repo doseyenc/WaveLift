@@ -4,37 +4,61 @@ import java.io.File
 
 /**
  * Resolves the paths to bundled yt-dlp and ffmpeg binaries.
- * 
+ *
  * Priority:
  * 1. Bundled in appResources (packaged app)
- * 2. System PATH fallback (development mode)
+ * 2. System install (PATH + common package manager locations)
+ *
+ * Lookups are not cached, so a binary installed while the app is running is picked up
+ * on the next download without a restart.
  */
 object BinaryLocator {
 
     private val isWindows = System.getProperty("os.name").lowercase().contains("win")
 
     /**
+     * Install locations that are missing from PATH when the app is launched from
+     * Finder/Dock (macOS gives GUI apps only /usr/bin:/bin:/usr/sbin:/sbin) or when
+     * a package manager updated PATH after the app was started.
+     */
+    private val extraSearchDirs: List<String> by lazy {
+        val home = System.getProperty("user.home")
+        if (isWindows) {
+            listOfNotNull(
+                System.getenv("LOCALAPPDATA")?.let { "$it\\Microsoft\\WinGet\\Links" },
+                "$home\\scoop\\shims"
+            )
+        } else {
+            listOf(
+                "/opt/homebrew/bin",
+                "/usr/local/bin",
+                "/opt/local/bin",
+                "$home/.local/bin",
+                "/usr/bin",
+                "/bin"
+            )
+        }
+    }
+
+    /**
      * Returns the absolute path to yt-dlp binary, or "yt-dlp" for PATH fallback.
      */
     fun ytDlpPath(): String {
-        val bundled = findBundledBinary("yt-dlp")
-        return bundled?.absolutePath ?: "yt-dlp"
+        return resolve("yt-dlp")?.absolutePath ?: "yt-dlp"
     }
 
     /**
      * Returns the absolute path to ffmpeg binary, or "ffmpeg" for PATH fallback.
      */
     fun ffmpegPath(): String {
-        val bundled = findBundledBinary("ffmpeg")
-        return bundled?.absolutePath ?: "ffmpeg"
+        return resolve("ffmpeg")?.absolutePath ?: "ffmpeg"
     }
 
     /**
-     * Returns the ffmpeg directory for yt-dlp's --ffmpeg-location flag, or null if not bundled.
+     * Returns the ffmpeg directory for yt-dlp's --ffmpeg-location flag, or null if not found.
      */
     fun ffmpegDir(): String? {
-        val bundled = findBundledBinary("ffmpeg")
-        return bundled?.parentFile?.absolutePath
+        return resolve("ffmpeg")?.parentFile?.absolutePath
     }
 
     /**
@@ -44,21 +68,23 @@ object BinaryLocator {
         return findBundledBinary("yt-dlp") != null
     }
 
+    /**
+     * PATH for child processes, so yt-dlp can find its own helpers (deno, ffprobe)
+     * even when the app was launched with a minimal PATH.
+     */
+    fun searchPath(): String {
+        return searchDirs().joinToString(File.pathSeparator)
+    }
+
+    private fun resolve(name: String): File? {
+        return findBundledBinary(name) ?: findSystemBinary(name)
+    }
+
     private fun findBundledBinary(name: String): File? {
         val resourcesDir = System.getProperty("compose.application.resources.dir") ?: return null
-        
-        val os = System.getProperty("os.name").lowercase()
-        val arch = System.getProperty("os.arch").lowercase()
-        
-        val platformDir = when {
-            os.contains("mac") -> if (arch.contains("aarch64") || arch.contains("arm64")) "macos-arm64" else "macos-x64"
-            os.contains("win") -> "windows-x64"
-            os.contains("linux") -> "linux-x64"
-            else -> null
-        } ?: return null
 
-        val binaryName = if (isWindows) "$name.exe" else name
-        val file = File(File(resourcesDir, platformDir), binaryName)
+        // Compose copies appResources/<os>-<arch>/ flat into the resources dir when packaging
+        val file = File(resourcesDir, binaryName(name))
 
         if (file.exists()) {
             // Ensure executable permission on macOS/Linux
@@ -69,4 +95,17 @@ object BinaryLocator {
         }
         return null
     }
+
+    private fun findSystemBinary(name: String): File? {
+        return searchDirs()
+            .map { File(it, binaryName(name)) }
+            .firstOrNull { it.isFile && it.canExecute() }
+    }
+
+    private fun searchDirs(): List<String> {
+        val pathDirs = System.getenv("PATH").orEmpty().split(File.pathSeparator)
+        return (pathDirs + extraSearchDirs).filter { it.isNotBlank() }.distinct()
+    }
+
+    private fun binaryName(name: String): String = if (isWindows) "$name.exe" else name
 }
