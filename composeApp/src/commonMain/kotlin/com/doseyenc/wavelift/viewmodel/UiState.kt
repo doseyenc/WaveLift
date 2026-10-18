@@ -2,6 +2,7 @@ package com.doseyenc.wavelift.viewmodel
 
 import com.doseyenc.wavelift.model.AudioQuality
 import com.doseyenc.wavelift.model.DownloadItem
+import com.doseyenc.wavelift.model.UpdateState
 import com.doseyenc.wavelift.ui.i18n.Language
 
 data class UiState(
@@ -15,5 +16,8 @@ data class UiState(
     val isAnalyzing: Boolean = false,
     val playlistInfo: String? = null,
     val isDarkTheme: Boolean = true,
-    val language: Language = Language.TURKISH
+    val language: Language = Language.TURKISH,
+    val appVersion: String? = null,
+    val autoUpdate: Boolean = true,
+    val update: UpdateState = UpdateState.Idle
 )

@@ -14,9 +14,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalUriHandler
 import com.doseyenc.wavelift.model.AudioQuality
+import com.doseyenc.wavelift.model.UpdateState
 import com.doseyenc.wavelift.ui.components.DownloadListItem
 import com.doseyenc.wavelift.ui.components.QualitySelector
 import com.doseyenc.wavelift.ui.components.SettingsToggles
+import com.doseyenc.wavelift.ui.components.UpdateBanner
 import com.doseyenc.wavelift.ui.i18n.Strings
 import com.doseyenc.wavelift.ui.i18n.getStrings
 import com.doseyenc.wavelift.viewmodel.UiState
@@ -35,6 +37,10 @@ fun MainScreen(
     onToggleLanguage: () -> Unit,
     onCancelDownload: (String) -> Unit,
     onSnackbarDismissed: () -> Unit,
+    onAutoUpdateChanged: (Boolean) -> Unit,
+    onCheckForUpdates: () -> Unit,
+    onDownloadUpdate: () -> Unit,
+    onInstallUpdate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -63,6 +69,45 @@ fun MainScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium
                     )
+                    Text(
+                        text = "${strings.versionLabel}: ${uiState.appVersion ?: strings.devBuildLabel}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = strings.autoUpdateTitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Switch(
+                            checked = uiState.autoUpdate,
+                            onCheckedChange = onAutoUpdateChanged,
+                            colors = SwitchDefaults.colors(
+                                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                checkedThumbColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = onCheckForUpdates,
+                        enabled = uiState.update is UpdateState.Idle || uiState.update is UpdateState.Available ||
+                            uiState.update is UpdateState.Failed,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (uiState.update is UpdateState.Checking) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(strings.checkUpdatesButton)
+                        }
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = { uriHandler.openUri("https://github.com/doseyenc") },
@@ -116,6 +161,18 @@ fun MainScreen(
                     onToggleLanguage = onToggleLanguage,
                     onShowAbout = { showAboutDialog = true }
                 )
+            }
+
+            if (uiState.update !is UpdateState.Idle && uiState.update !is UpdateState.Checking) {
+                item {
+                    UpdateBanner(
+                        state = uiState.update,
+                        strings = strings,
+                        onDownload = onDownloadUpdate,
+                        onInstall = onInstallUpdate,
+                        onOpenRelease = uriHandler::openUri
+                    )
+                }
             }
 
             item {

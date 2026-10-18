@@ -22,7 +22,11 @@ fun App(viewModel: DownloadViewModel) {
             onToggleTheme = viewModel::onToggleTheme,
             onToggleLanguage = viewModel::onToggleLanguage,
             onCancelDownload = viewModel::cancelDownload,
-            onSnackbarDismissed = viewModel::onSnackbarDismissed
+            onSnackbarDismissed = viewModel::onSnackbarDismissed,
+            onAutoUpdateChanged = viewModel::onAutoUpdateChanged,
+            onCheckForUpdates = { viewModel.checkForUpdates() },
+            onDownloadUpdate = viewModel::downloadUpdate,
+            onInstallUpdate = viewModel::installUpdate
         )
     }
 }
