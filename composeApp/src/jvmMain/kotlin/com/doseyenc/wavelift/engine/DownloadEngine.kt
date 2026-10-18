@@ -30,6 +30,7 @@ class DownloadEngine {
             val processBuilder = ProcessBuilder(command)
                 .redirectErrorStream(true)
                 .directory(java.io.File(outputDir))
+            processBuilder.environment()["PATH"] = BinaryLocator.searchPath()
 
             process = processBuilder.start()
         } catch (e: java.io.IOException) {
@@ -97,6 +98,7 @@ class DownloadEngine {
         val process: Process
         try {
             val processBuilder = ProcessBuilder(command).redirectErrorStream(true)
+            processBuilder.environment()["PATH"] = BinaryLocator.searchPath()
             process = processBuilder.start()
         } catch (e: Exception) {
             emit(DownloadState.Error("Failed to start analysis: ${e.message}"))
