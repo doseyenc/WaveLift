@@ -79,7 +79,28 @@ data class Strings(
     val aboutTitle: String,
     val developerTitle: String,
     val githubButton: String,
-    val linkedinButton: String
+    val linkedinButton: String,
+    val versionLabel: String,
+    val devBuildLabel: String,
+
+    // Updates
+    val autoUpdateTitle: String,
+    val checkUpdatesButton: String,
+    val updateAvailableTitle: String,
+    val updateDownloadingTitle: String,
+    val updateReadyTitle: String,
+    val updateReadyDesc: String,
+    val updateInstallingTitle: String,
+    val updateFailedTitle: String,
+    val updateDownloadButton: String,
+    val updateInstallButton: String,
+    val updateRetryButton: String,
+    val updateOpenPageButton: String,
+    val updateReleaseNotesButton: String,
+    val updateUpToDate: String,
+    val updateCheckFailed: String,
+    val updateWaitForDownloads: String,
+    val updateDevBuild: String
 )
 
 val TurkishStrings = Strings(
@@ -135,7 +156,26 @@ val TurkishStrings = Strings(
     aboutTitle = "WaveLift Hakkında",
     developerTitle = "Geliştirici",
     githubButton = "GitHub",
-    linkedinButton = "LinkedIn"
+    linkedinButton = "LinkedIn",
+    versionLabel = "Sürüm",
+    devBuildLabel = "geliştirme",
+    autoUpdateTitle = "Güncellemeleri otomatik indir",
+    checkUpdatesButton = "Güncellemeleri Kontrol Et",
+    updateAvailableTitle = "Yeni sürüm mevcut",
+    updateDownloadingTitle = "Güncelleme indiriliyor",
+    updateReadyTitle = "Güncelleme hazır",
+    updateReadyDesc = "Yeniden başlatınca yeni sürüm kurulacak.",
+    updateInstallingTitle = "Güncelleme kuruluyor...",
+    updateFailedTitle = "Güncelleme indirilemedi",
+    updateDownloadButton = "İndir",
+    updateInstallButton = "Yeniden Başlat ve Güncelle",
+    updateRetryButton = "Tekrar Dene",
+    updateOpenPageButton = "İndirme Sayfası",
+    updateReleaseNotesButton = "Yenilikler",
+    updateUpToDate = "En güncel sürümü kullanıyorsunuz. ✓",
+    updateCheckFailed = "Güncelleme kontrolü başarısız oldu.",
+    updateWaitForDownloads = "Güncellemeden önce devam eden indirmelerin bitmesini bekleyin.",
+    updateDevBuild = "Geliştirme sürümünde güncelleme kontrolü yapılmaz."
 )
 
 val EnglishStrings = Strings(
@@ -191,7 +231,26 @@ val EnglishStrings = Strings(
     aboutTitle = "About WaveLift",
     developerTitle = "Developer",
     githubButton = "GitHub",
-    linkedinButton = "LinkedIn"
+    linkedinButton = "LinkedIn",
+    versionLabel = "Version",
+    devBuildLabel = "development",
+    autoUpdateTitle = "Download updates automatically",
+    checkUpdatesButton = "Check for Updates",
+    updateAvailableTitle = "New version available",
+    updateDownloadingTitle = "Downloading update",
+    updateReadyTitle = "Update ready",
+    updateReadyDesc = "The new version will be installed when you restart.",
+    updateInstallingTitle = "Installing update...",
+    updateFailedTitle = "Couldn't download the update",
+    updateDownloadButton = "Download",
+    updateInstallButton = "Restart & Update",
+    updateRetryButton = "Retry",
+    updateOpenPageButton = "Download Page",
+    updateReleaseNotesButton = "What's New",
+    updateUpToDate = "You're on the latest version. ✓",
+    updateCheckFailed = "Couldn't check for updates.",
+    updateWaitForDownloads = "Wait for active downloads to finish before updating.",
+    updateDevBuild = "Update checks are disabled in development builds."
 )
 
 fun getStrings(language: Language): Strings = when (language) {
