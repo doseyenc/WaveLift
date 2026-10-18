@@ -53,12 +53,13 @@ jobs:
           # macOS arm64
           curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos -o composeApp/appResources/macos-arm64/yt-dlp
           chmod +x composeApp/appResources/macos-arm64/yt-dlp
-          curl -L https://evermeet.cx/ffmpeg/get/zip -o ffmpeg_mac.zip && unzip -o ffmpeg_mac.zip -d composeApp/appResources/macos-arm64/ && rm ffmpeg_mac.zip
+          curl -fL https://ffmpeg.martin-riedl.de/redirect/latest/macos/arm64/release/ffmpeg.zip -o ffmpeg_mac.zip && unzip -o ffmpeg_mac.zip -d composeApp/appResources/macos-arm64/ && rm ffmpeg_mac.zip
           chmod +x composeApp/appResources/macos-arm64/ffmpeg
-          
+
           # macOS x64
           cp composeApp/appResources/macos-arm64/yt-dlp composeApp/appResources/macos-x64/yt-dlp
-          cp composeApp/appResources/macos-arm64/ffmpeg composeApp/appResources/macos-x64/ffmpeg
+          curl -fL https://ffmpeg.martin-riedl.de/redirect/latest/macos/amd64/release/ffmpeg.zip -o ffmpeg_mac_x64.zip && unzip -o ffmpeg_mac_x64.zip -d composeApp/appResources/macos-x64/ && rm ffmpeg_mac_x64.zip
+          chmod +x composeApp/appResources/macos-x64/ffmpeg
           
           # Windows x64
           curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe -o composeApp/appResources/windows-x64/yt-dlp.exe
