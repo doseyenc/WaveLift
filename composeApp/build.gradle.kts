@@ -97,7 +97,7 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
 
             packageName = "WaveLift"
-            packageVersion = "1.1.1"
+            packageVersion = "1.2.0"
             description = "YouTube to MP3 converter with modern UI"
             vendor = "doseyenc"
             copyright = "© 2026 doseyenc"
@@ -108,7 +108,7 @@ compose.desktop {
             macOS {
                 bundleID = "com.doseyenc.wavelift"
                 iconFile.set(project.file("src/jvmMain/resources/WaveLift.icns"))
-                dmgPackageVersion = "1.1.1"
+                dmgPackageVersion = "1.2.0"
                 dmgPackageBuildVersion = "1"
 
                 // Signing — activate via gradle.properties:
